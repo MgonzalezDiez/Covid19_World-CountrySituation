@@ -1,0 +1,99 @@
+body {
+	font-family: 'Varela Round', sans-serif;
+}
+.form-control {
+	box-shadow: none;
+	border-color: #ddd;
+}
+.form-control:focus {
+	border-color: #d8137f;
+	box-shadow: 0 0 8px rgba(251,110,157,0.4);
+}
+
+.centrado {
+	height: 100vh;
+	background-color: #343A40;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.myLoader {
+	position: fixed;
+	left: 0px;
+	top: 40px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	/* background: url('/public/covid19/assets/imgs/Spinner.gif') 70% 70% no-repeat rgb(249,249,249); */
+	text-align: center;
+	color: white;
+	opacity: 1;
+}
+
+.modal-login {
+	color: #434343;
+	width: 350px;
+}
+.modal-login .modal-content {
+	padding: 20px;
+	border-radius: 1px;
+	border: none;
+	position: relative;
+}
+.modal-login .modal-header {
+	border-bottom: none;
+}
+.modal-login h4 {
+	text-align: center;
+	font-size: 22px;
+	margin-bottom: -10px;
+}
+.modal-login .avatar {
+	color: #fff;
+	margin: 0 auto;
+	text-align: center;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	z-index: 9;
+	background: #d8137f;
+	padding: 15px;
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+}
+.modal-login .avatar i {
+	font-size: 62px;
+}
+.modal-login .form-control, .modal-login .btn {
+	min-height: 40px;
+	border-radius: 1px; 
+	transition: all 0.5s;
+}    
+.modal-login .hint-text {
+	text-align: center;
+	padding-top: 10px;
+}
+.modal-login .close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+}
+.modal-login .btn {
+	background: #d8137f;
+	border: none;
+	line-height: normal;
+}
+.modal-login .btn:hover, .modal-login .btn:focus {
+	background: #d8137f;
+}
+.modal-login .hint-text a {
+	color: #999;
+}
+.trigger-btn {
+	display: inline-block;
+	margin: 100px auto;
+}
+#chartChile {
+	margin-top: 100px;
+}
+
