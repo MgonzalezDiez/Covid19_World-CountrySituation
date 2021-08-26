@@ -3,6 +3,7 @@ var confirmed = [];
 var deaths = [];
 var recovered = [];
 
+// Obtiene la información desde la API para el llenado de los datos COVID en Chile
 const getData = async (jwt) => {
 	const baseUrl = 'http://localhost:3000/api/';
 
@@ -18,35 +19,55 @@ const getData = async (jwt) => {
 	}
 
 	const resConfirmed = async () => {
-		const url = baseUrl+'confirmed';
+		const url = baseUrl + 'confirmed';
 		return request(url)
 	}
 
 	const resDeaths = async () => {
-		const url = baseUrl+'deaths';
+		const url = baseUrl + 'deaths';
 		return request(url)
 	}
 
 	const resRecovered = async () => {
-		const url = baseUrl+'recovered';
+		const url = baseUrl + 'recovered';
 		return request(url)
 	}
 
-	Promise.all([ resRecovered(), resDeaths(), resConfirmed()])
+	Promise.all([resRecovered(), resDeaths(), resConfirmed()])
 		.then(response => {
 			if (response[0].message === 'Not Found') {
 				alert('No existen datos a mostrar');
 				return
 			}
-			
 			fillData(response);
 			$('#loader').fadeOut('slow');
 		})
 		.catch(err => console.error(`Error: ${err}`));
-		
 	//return { confirmed, deaths, recovered }
 };
 
+//  Llena datos para el gráfico
+const fillData = async (resp) => {
+	for (let i = 0; i < resp[0].data.length; i++) {
+		let day1 = new Date(resp[0].data[i].date).getDate();
+		let month1 = new Date(resp[0].data[i].date).getMonth() + 1;
+		let year1 = new Date(resp[0].data[i].date).getFullYear();
+
+		confirmed.push({
+			label: day1 + '/' + month1 + '/' + year1,
+			y: resp[2].data[i].total / 1000
+		});
+		deaths.push({
+			label: day1 + '/' + month1 + '/' + year1,
+			y: resp[1].data[i].total / 1000
+		});
+		recovered.push({
+			label: day1 + '/' + month1 + '/' + year1,
+			y: resp[0].data[i].total / 1000
+		});
+	}
+	ChileSituation.render();
+};
 
 
 // Obtiene la información para llenar el gráfico
@@ -94,28 +115,8 @@ const getData = async (jwt) => {
 //   sessionClose()
 // }
 // };
-//  Llena datos para el gráfico
-const fillData = async (resp) => {
-	for (let i = 0; i < resp[0].data.length; i++) {
-		let day1 = new Date(resp[0].data[i].date).getDate();
-		let month1 = new Date(resp[0].data[i].date).getMonth() + 1;
-		let year1 = new Date(resp[0].data[i].date).getFullYear();
 
-		confirmed.push({
-			label: day1 + '/' + month1 + '/' + year1,
-			y: resp[0].data[i].total / 1000
-		});
-		deaths.push({
-			label: day1 + '/' + month1 + '/' + year1,
-			y: resp[1].data[i].total/ 1000
-		});
-		recovered.push({
-			label: day1 + '/' + month1 + '/' + year1,
-			y: resp[2].data[i].total / 1000
-		});
-	}
-	ChileSituation.render();
-};
+
 
 // Gráfico que muestra la situación Covid en Chile
 var ChileSituation = new CanvasJS.Chart("chartChile", {
@@ -128,34 +129,34 @@ var ChileSituation = new CanvasJS.Chart("chartChile", {
 	},
 
 	axisY: [{
-		title: "Confirmados (Miles)",
-		lineColor: "#369EAD",
-		tickColor: "#369EAD",
-		labelFontColor: "#369EAD",
-		labelFontSize: 14,
-		titleFontColor: "#369EAD",
-		titleFontSize: 18,
-		includeZero: true,
-		suffix: "k"
-	},
-	{
-		title: "Fallecidos (Miles)",
-		lineColor: "#C24642",
-		tickColor: "#C24642",
-		labelFontColor: "#C24642",
-		labelFontSize: 14,
-		titleFontColor: "#C24642",
-		titleFontSize: 18,
-		includeZero: true,
-		suffix: "k"
-	}],
+			title: "Recuperados (Miles)",
+			lineColor: "#006400 ;",
+			tickColor: "#006400 ",
+			labelFontColor: "#006400 ",
+			labelFontSize: 14,
+			titleFontColor: "#006400 ",
+			titleFontSize: 18,
+			includeZero: true,
+			suffix: "k"
+		},
+		{
+			title: "Confirmados (Miles)",
+			lineColor: "#4F81BC",
+			tickColor: "#4F81BC",
+			labelFontColor: "#4F81BC",
+			labelFontSize: 14,
+			titleFontColor: "#4F81BC",
+			titleFontSize: 18,
+			includeZero: true,
+			suffix: "k"
+		}],
 	axisY2: {
-		title: "Recuperados (Miles)",
-		lineColor: "#7F6084",
-		tickColor: "#7F6084",
-		labelFontColor: "#7F6084",
+		title: "Fallecidos (Miles)",
+		lineColor: "#C0504E",
+		tickColor: "#C0504E",
+		labelFontColor: "#C0504E",
 		labelFontSize: 14,
-		titleFontColor: "#7F6084",
+		titleFontColor: "#C0504E",
 		titleFontSize: 18,
 		includeZero: true,
 		suffix: "k"
@@ -165,43 +166,44 @@ var ChileSituation = new CanvasJS.Chart("chartChile", {
 	},
 	legend: {
 		cursor: "pointer",
-		// verticalAlign: "top",
-		// horizontalAlign: "center",
-		// dockInsidePlotArea: true,
+		verticalAlign: "bottom",
+		horizontalAlign: "center",
+		dockInsidePlotArea: false,
 		itemclick: toggleDataSeries
 	},
-	data: [{
-		type: "line",
-		name: "Fallecidos",
-		color: "#C24642",
-		showInLegend: true,
-		axisYIndex: 1,
-		markerType: "square",
-		markerSize: 1,
-		yValueFormatString: "#,##0k",
-		dataPoints: deaths
-	},
-	{
-		type: "line",
-		name: "Confirmados",
-		color: "#369EAD",
-		showInLegend: true,
-		axisYIndex: 0,
-		markerType: "square",
-		markerSize: 1,
-		yValueFormatString: "#,##0k",
-		dataPoints: confirmed
-	},
-	{
-		type: "line",
-		name: "Recuperados",
-		color: "#7F6084",
-		axisYType: "secondary",
-		showInLegend: true,
-		markerSize: 1,
-		yValueFormatString: "#,##0k",
-		dataPoints: recovered
-	}]
+	data: [
+		{
+			type: "line",
+			name: "Confirmados",
+			color: "#4F81BC",
+			showInLegend: true,
+			axisYIndex: 1,
+			markerType: "square",
+			markerSize: 1,
+			yValueFormatString: "#,##0k",
+			dataPoints: confirmed
+		},
+		{
+			type: "line",
+			name: "Recuperados",
+			color: "#006400 ",
+			showInLegend: true,
+			markerSize: 0,
+			yValueFormatString: "#,##0k",
+			dataPoints: recovered
+		}
+		,
+		{
+			type: "line",
+			name: "Fallecidos",
+			color: "#C0504E",
+			axisYType: "secondary",
+			showInLegend: true,
+			markerType: "square",
+			markerSize: 1,
+			yValueFormatString: "#,##0k",
+			dataPoints: deaths
+		}]
 });
 ChileSituation.render();
 
@@ -213,7 +215,7 @@ function toggleDataSeries(e) {
 	else {
 		e.dataSeries.visible = true;
 	}
-	situacionChile.render();
+	ChileSituation.render();
 };
 
 // Llena datos de gráfico
@@ -245,11 +247,7 @@ var sitChile = async () => {
 	const token = localStorage.getItem('jwt-token');
 	if (token) {
 		$('#loader').html('<div ><img src="./assets/imgs/Spinner2.gif" alt="loading" /><br/>Un momento, por favor...</div>');
-		// let a = await getChileanData(token);
-		// let b = await fillData();
 		let w = await getData(token);
-		
-		// $('#loader').fadeOut('slow');
 	}
 	else {
 		window.location.href = "./index.html"

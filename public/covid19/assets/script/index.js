@@ -3,11 +3,25 @@ let page = 1;
 
 $('#IniciarSesion').click(function () {
   localStorage.removeItem('jwt-token');
-  $('#myModal').modal('toggle');
+  $('#myModal').modal({backdrop: 'static', keyborad: false});
 });
 
 $('#login').click(function () {
-  $('#myModal').modal('toggle');
+  const email = document.getElementById('js-input-email').value
+  const password = document.getElementById('js-input-password').value
+  let msgErr = "";
+  let msg = document.querySelector('#msgErr');
+  if(email === ""){
+    msgErr = "Ingrese Usuario";
+  }
+  else if(password === ""){
+    msgErr = "Ingrese Password";
+  }
+  if (msgErr != ''){
+    alert(msgErr);
+  }else{
+    $('#myModal').modal('toggle');
+  }
 });
 
 $('#cerrarSesion').click(function () {
@@ -115,7 +129,7 @@ let chart1 = new CanvasJS.Chart("newChartContainer", {
     labelFontColor: "#4F81BC",
     labelFontSize: 12,
     tickColor: "#4F81BC",
-    // suffix: "k",
+    suffix: "k",
     labelMaxWidth: 50,
   },
   axisY2: {
@@ -125,7 +139,7 @@ let chart1 = new CanvasJS.Chart("newChartContainer", {
     lineColor: "#C0504E",
     labelFontColor: "#C0504E",
     labelFontSize: 12,
-    // suffix: "k",
+    suffix: "k",
     tickColor: "#C0504E"
   },
   toolTip: {
@@ -169,7 +183,7 @@ function toggleDataSeries(e) {
 
 //  Llenado de los datos para el gráfico mundial
 const fillData = (data) => {
-  let covidData = data.filter(p => p.confirmed > 5000000);
+  let covidData = data.filter(p => p.confirmed > 3000000);
   for (let i = 0; i < covidData.length; i++) {
     confirmadosM.push({
       label: covidData[i].location,
@@ -238,17 +252,23 @@ $('#js-form').submit(async (event) => {
   event.preventDefault()
   const email = document.getElementById('js-input-email').value
   const password = document.getElementById('js-input-password').value
+  let mensaje = '';
+
   const JWT = await postData(email, password);
   if (JWT) {
     $('#situacionChile').show();
     $('#iniciarSesion').hide();
     $('#cerrarSesion').show();
+    mensaje="Sesión iniciada correctamente";
   }
-  else {
-    let msg = document.querySelector('#message');
+  else 
+  {
+    mensaje = "Usuario o contraseña incorrecta"
+  }
+  let msg = document.querySelector('#message');
     msg.innerHTML =
       `<div class="mt-5 alert alert-danger alert-dismissible text-center fade show" role="alert" id="alertInfo" >
-                        <strong>Usuario o contraseña erróneos</strong>
+                        <strong>${mensaje}</strong>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -256,7 +276,6 @@ $('#js-form').submit(async (event) => {
     window.setTimeout(function () {
       $("#alertInfo").alert('close');
     }, 3000);
-  }
 
 })
 
