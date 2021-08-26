@@ -17,7 +17,7 @@ $('#cerrarSesion').click(function () {
   localStorage.clear();
 });
 
-// Situacion Chile
+// Login de usuario
 const postData = async (email, password) => {
   try {
     const response = await fetch('http://localhost:3000/api/login',
@@ -33,6 +33,7 @@ const postData = async (email, password) => {
   }
 }
 
+// Obtiene información COVID
 const getData = async (url) => {
   try {
     const response = await fetch(url)
@@ -45,10 +46,10 @@ const getData = async (url) => {
   }
 };
 
-var dataPoints1 = [];
-var dataPoints2 = [];
-var dataPoints3 = [];
-var dataPoints4 = [];
+var confirmadosM = [];
+var fallecidosM = [];
+var confirmadosP = [];
+var fallecidosP = [];
 
 // Chart Situación Mundial //
 let chart = new CanvasJS.Chart("chartContainer", {
@@ -85,7 +86,7 @@ let chart = new CanvasJS.Chart("chartContainer", {
     legendText: "Confirmados",
     showInLegend: true,
     yValueFormatString: "#,##0k",
-    dataPoints: dataPoints1
+    dataPoints: confirmadosM
   },
   {
     type: "column",
@@ -94,7 +95,7 @@ let chart = new CanvasJS.Chart("chartContainer", {
     axisYType: "secondary",
     showInLegend: true,
     yValueFormatString: "#,##0k",
-    dataPoints: dataPoints2
+    dataPoints: fallecidosM
 
   }]
 });
@@ -140,7 +141,7 @@ let chart1 = new CanvasJS.Chart("newChartContainer", {
     legendText: "Confirmados",
     showInLegend: true,
     yValueFormatString: "#,##0k",
-    dataPoints: dataPoints3
+    dataPoints: confirmadosP
   },
   {
     type: "column",
@@ -149,13 +150,13 @@ let chart1 = new CanvasJS.Chart("newChartContainer", {
     showInLegend: true,
     yValueFormatString: "#,##0k",
     axisYType: "secondary",
-    dataPoints: dataPoints4
+    dataPoints: fallecidosP
 
   }]
 });
 
 
-
+// Información de la serie de gráficos
 function toggleDataSeries(e) {
   if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
     e.dataSeries.visible = false;
@@ -166,26 +167,24 @@ function toggleDataSeries(e) {
   chart.render();
 };
 
-
+//  Llenado de los datos para el gráfico mundial
 const fillData = (data) => {
   let covidData = data.filter(p => p.confirmed > 5000000);
   for (let i = 0; i < covidData.length; i++) {
-    dataPoints1.push({
+    confirmadosM.push({
       label: covidData[i].location,
       y: covidData[i].confirmed / 1000
     });
-    dataPoints2.push({
+    fallecidosM.push({
       label: covidData[i].location,
       y: covidData[i].deaths / 1000
     });
   }
   chart.render();
-
-
 };
 
 
-
+// Muestra tabla con información COVID de todos los paises 
 const showTable = (covidData) => {
   if (covidData) {
     let tabla = document.getElementById("tableData");
@@ -221,7 +220,7 @@ const showTable = (covidData) => {
 
 const init = async () => {
   let token = localStorage.getItem('jwt-token');
-  if(token){
+  if (token) {
     $('#situacionChile').show();
     $('#iniciarSesion').hide();
     $('#cerrarSesion').show();
@@ -257,11 +256,11 @@ $('#js-form').submit(async (event) => {
     window.setTimeout(function () {
       $("#alertInfo").alert('close');
     }, 3000);
-    // alert-success
   }
 
 })
 
+// Cierre de sesión
 const sessionClose = () => {
   localStorage.clear();
   const btn = document.getElementById("showMore");
@@ -272,30 +271,55 @@ const sessionClose = () => {
   window.location.reload();
 }
 
+// Muestra u oculta Gráfico y Tabla
 const toggleFormAndTable = (state1, state2) => {
   $(`#js-container`).toggle(state1)
   $(`#chartContainer`).toggle(state2)
 }
 
+// Muestra gráfico por país
 const mostrarDetalle = (async (country) => {
   let countryData = "";
-  for (let i = dataPoints3.length; i > 0; i--) {
-    dataPoints3.pop();
+  for (let i = confirmadosP.length; i > 0; i--) {
+    confirmadosP.pop();
   }
-  for (let i = dataPoints4.length; i > 0; i--) {
-    dataPoints4.pop();
+  for (let i = fallecidosP.length; i > 0; i--) {
+    fallecidosP.pop();
   }
   let url = `http://localhost:3000/api/countries/${country}`;
   countryData = await getData(url);
 
-  dataPoints3.push({
-    label: countryData.location,
-    y: countryData.confirmed /1000
-  });
-  dataPoints4.push({
-    label: countryData.location,
-    y: countryData.deaths /1000
-  });
-  chart1.render();
-  $('#loadMe').modal('toggle');
+  if (Object.keys(countryData).length > 0) {
+    confirmadosP.push({
+      label: countryData.location,
+      y: countryData.confirmed / 1000
+    });
+    fallecidosP.push({
+      label: countryData.location,
+      y: countryData.deaths / 1000
+    });
+    chart1.render();
+    $('#loadMe').modal('toggle');
+  }
+  else {
+    let msg = document.querySelector('#showInfo');
+    msg.innerHTML =
+      `
+      <div class="modal fade" id="showMe" tabindex="-1" aria-labelledby="loadMeLabel">
+        <div class="modal-dialog modal-sm" role="document">
+          <div class="modal-content" style="height: 100px; width: 400px;">
+            <div class="modal-body text-center">
+            <strong>No existe información para mostrar</strong>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    $('#showMe').modal('toggle');
+
+    window.setTimeout(function () {
+      $("#showMe").modal('toggle');
+    }, 3000);
+  }
+
 });
